@@ -6,6 +6,8 @@ from sqlmodel import Session
 
 from database import create_db_and_tables, get_session
 
+from routers.dog_router import router as dog_router
+from routers.command_router import router as command_router
 
 @asynccontextmanager
 async def lifespan(app):
@@ -15,6 +17,9 @@ async def lifespan(app):
 
 app = FastAPI(lifespan=lifespan)
 SessionDep = Annotated[Session, Depends(get_session)]
+
+app.include_router(dog_router)
+app.include_router(command_router)
 
 
 @app.get("/")
