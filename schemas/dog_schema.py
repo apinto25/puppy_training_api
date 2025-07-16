@@ -14,3 +14,5 @@ class DogRead(BaseModel):
     name: str
     breed: str
     birth_date: date
+    class Config:
+        from_attributes = True
