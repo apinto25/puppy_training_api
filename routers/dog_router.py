@@ -3,6 +3,8 @@ from sqlmodel import Session, select
 from models.dog import Dog
 from schemas.dog_schema import DogCreate, DogRead
 from database import get_session
+from models.training_session import TrainingSession
+from schemas.training_session_schema import TrainingSessionRead
 
 
 router = APIRouter(prefix="/dogs", tags=["dogs"])
@@ -38,4 +40,12 @@ def delete_dog(dog_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Dog not found")
     session.delete(dog)
     session.commit()
-    return None
+
+
+@router.get("/{dog_id}/training_sessions", response_model=list[TrainingSessionRead])
+def get_training_sessions_for_dog(dog_id: int, session: Session = Depends(get_session)):
+    dog = session.get(Dog, dog_id)
+    if not dog:
+        raise HTTPException(status_code=404, detail="Dog not found")
+    training_sessions = session.exec(select(TrainingSession).where(TrainingSession.dog_id == dog_id)).all()
+    return training_sessions
