@@ -1,36 +1,7 @@
-import pytest
-
 from datetime import date
-
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
-
-from main import app
-from database import get_session
+from sqlmodel import Session
 from models.dog import Dog
-
-
-@pytest.fixture(name="session")  
-def session_fixture():  
-    engine = create_engine(
-        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-    )
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        yield session  
-
-
-@pytest.fixture(name="client")  
-def client_fixture(session: Session):  
-    def get_session_override():  
-        return session
-
-    app.dependency_overrides[get_session] = get_session_override  
-
-    client = TestClient(app)  
-    yield client
-    app.dependency_overrides.clear()
 
 
 def test_get_dogs(session: Session, client: TestClient):
@@ -40,7 +11,6 @@ def test_get_dogs(session: Session, client: TestClient):
     session.commit()
 
     response = client.get("/dogs/")
-    app.dependency_overrides.clear()
     data = response.json()
 
     assert response.status_code == 200
@@ -61,10 +31,12 @@ def test_get_dog_by_id(session: Session, client: TestClient):
     assert data["id"] == dog_1.id
     assert data["name"] == "Max"
 
+
 def test_get_dog_by_id_not_found(client: TestClient):
     response = client.get("/dogs/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Dog not found"
+
 
 def test_create_dog(client: TestClient):
     payload = {
@@ -79,6 +51,7 @@ def test_create_dog(client: TestClient):
     assert data["name"] == "Bella"
     assert data["breed"] == "Beagle"
     assert data["birth_date"] == "2021-07-10"
+
 
 def test_delete_dog(session: Session, client: TestClient):
     dog_1 = Dog(name="Rocky", breed="Boxer", birth_date=date(2018, 3, 15))
