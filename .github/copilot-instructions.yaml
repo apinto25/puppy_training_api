@@ -1,0 +1,18 @@
+completion:
+  language: python
+  style: "pep8"
+  indentation: 4
+  quotes: "double"
+naming:
+  variables: "snake_case"
+  functions: "snake_case"
+  classes: "PascalCase"
+  constants: "UPPER_SNAKE_CASE"
+context:
+  keywords:
+    - "REST API"
+  frameworks:
+    - "FastAPI"
+    - "SQLModel"
+    - "Pytest"
+  project_description: "This is a backend REST API for dog training, using FastAPI Framework."
